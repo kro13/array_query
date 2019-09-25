@@ -31,7 +31,7 @@ class ArrayQuery
         }
     }
 
-    public static function matchMacro(itemFields:Array<String>, query:Expr):Expr
+    private static function matchMacro(itemFields:Array<String>, query:Expr):Expr
     {
         #if macro
         var queryFields:Array<String> = getFields(query);
@@ -73,7 +73,7 @@ class ArrayQuery
         #end
     }
 
-    public static /*macro*/ function matchMacro1(item:Expr, query:Expr):Expr
+    private static function matchMacro1(item:Expr, query:Expr):Expr
     {
         #if macro
         var itemName:String = getVarName(item);
@@ -118,7 +118,7 @@ class ArrayQuery
         #end
     }
 
-    public static function getVarName(expr:Expr):String
+    private static function getVarName(expr:Expr):String
     {
         #if macro
         var varName:String = "";
@@ -138,7 +138,7 @@ class ArrayQuery
         #end
     }
 
-    public static function getFields(expr:Expr):Array<String>
+    private static function getFields(expr:Expr):Array<String>
     {
         #if macro
         var t:Type = Context.typeof(expr);
