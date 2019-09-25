@@ -1,10 +1,8 @@
+-cp test
 -cp src
-
--main Main
-
--js bin/test.js
 -dce no
 -debug
 -D dump=pretty
---next
+-js bin/test.js
+-main Test
 -cmd node bin/test.js

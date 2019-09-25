@@ -12,45 +12,78 @@ class ArrayQuery
 
     public static macro function match<T>(collection:ExprOf<Array<T>>, query:Expr):Expr
     {
-        var itemFields:Array<String> = getFields(collection);
-        var matchImpl:Expr = matchMacro(itemFields, query);
+        //trace(query.expr);
+
+        var matchImpl:Expr = null;
+
+        switch (query.expr)
+        {
+            case EObjectDecl(fields):
+                //trace(fields);
+                matchImpl = buildAnonQueryExpr(fields);
+
+            default:
+                matchImpl = buildQueryExpr(query);
+        }
+
         return macro {
             function()
             {
+                var items = [];
                 for (item in $collection)
                 {
                     if ($matchImpl)
                     {
-                        return item;
+                        items.push(item);
                     }
                 }
-
-                return null;
+                return items;
             }();
-
         }
     }
 
-    private static function matchMacro(itemFields:Array<String>, query:Expr):Expr
+    private static function buildAnonQueryExpr(fields:Array<{field:String, expr:haxe.macro.Expr}>):Expr
     {
         #if macro
-        var queryFields:Array<String> = getFields(query);
-        var queryName:String = getVarName(query);
+        //trace(fields);
+        var queryFields:Array<String> = [];
+        var queryValues:Array<Dynamic> = [];
+        for (f in fields)
+        {
+            //trace(f.expr.expr);
+            switch (f.expr.expr)
+            {
+                case EConst(CInt(v)):
+                    queryFields.push(f.field);
+                    queryValues.push(v);
+
+                case EConst(CString(v)):
+                    queryFields.push(f.field);
+                    queryValues.push('\"$v\"');
+
+                case EConst(CFloat(v)):
+                    queryFields.push(f.field);
+                    queryValues.push(v);
+
+                case EConst(CIdent(v)):
+                    queryFields.push(f.field);
+                    queryValues.push(v);
+
+                default:
+            }
+        }
 
         var checks:Array<String> = [];
+        var i:Int = 0;
+
+        //trace(queryFields);
 
         for (qF in queryFields)
         {
-            if (itemFields.indexOf(qF) < 0)
-            {
-                return macro $v{false};
-            }
-            else
-            {
-                var checkStr:String = 'item.${qF} == ${queryName}.${qF}';
-                trace(checkStr);
-                checks.push(checkStr);
-            }
+            var checkStr:String = 'item.${qF} == ${queryValues[i]}';
+            //trace(checkStr);
+            checks.push(checkStr);
+            i++;
         }
 
         var allChecksStr:String = "";
@@ -65,7 +98,7 @@ class ArrayQuery
             i++;
         }
 
-        trace(allChecksStr);
+        //trace(allChecksStr);
 
         return Context.parse(allChecksStr, Context.currentPos());
         #else
@@ -73,29 +106,19 @@ class ArrayQuery
         #end
     }
 
-    private static function matchMacro1(item:Expr, query:Expr):Expr
+    private static function buildQueryExpr(query:Expr):Expr
     {
         #if macro
-        var itemName:String = getVarName(item);
-        var queryName:String = getVarName(query);
-
-        var itemFields:Array<String> = getFields(item);
         var queryFields:Array<String> = getFields(query);
+        var queryName:String = getVarName(query);
 
         var checks:Array<String> = [];
 
         for (qF in queryFields)
         {
-            if (itemFields.indexOf(qF) < 0)
-            {
-                return macro $v{false};
-            }
-            else
-            {
-                var checkStr:String = '${itemName}.${qF} == ${queryName}.${qF}';
-                trace(checkStr);
-                checks.push(checkStr);
-            }
+            var checkStr:String = 'item.${qF} == ${queryName}.${qF}';
+            //trace(checkStr);
+            checks.push(checkStr);
         }
 
         var allChecksStr:String = "";
@@ -110,7 +133,7 @@ class ArrayQuery
             i++;
         }
 
-        trace(allChecksStr);
+        //trace(allChecksStr);
 
         return Context.parse(allChecksStr, Context.currentPos());
         #else
@@ -142,9 +165,9 @@ class ArrayQuery
     {
         #if macro
         var t:Type = Context.typeof(expr);
-        trace(expr);
-        trace(t);
-        trace(Context.follow(t));
+        //trace(expr);
+        //trace(t);
+        //trace(Context.follow(t));
 
         var fieldNames:Array<String> = [];
 
@@ -158,6 +181,7 @@ class ArrayQuery
                     //trace('${f.name}');
                     fieldNames.push(f.name);
                 }
+
             case TInst(ref, [TType(type, params)]) if (ref.toString() == "Array"):
                 switch(Context.follow(type.get().type))
                 {
@@ -171,7 +195,6 @@ class ArrayQuery
                         }
                     default:
                  }
-
 
             case TInst(ref, params):
                 trace(ref);
