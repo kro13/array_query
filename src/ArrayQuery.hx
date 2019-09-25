@@ -12,7 +12,6 @@ class ArrayQuery
 
     public static macro function match<T>(collection:ExprOf<Array<T>>, query:Expr):Expr
     {
-        //trace(collection);
         var itemFields:Array<String> = getFields(collection);
         var matchImpl:Expr = matchMacro(itemFields, query);
         return macro {
@@ -32,7 +31,7 @@ class ArrayQuery
         }
     }
 
-    public static /*macro*/ function matchMacro(itemFields:Array<String>, query:Expr):Expr
+    public static function matchMacro(itemFields:Array<String>, query:Expr):Expr
     {
         #if macro
         var queryFields:Array<String> = getFields(query);

@@ -1,0 +1,10 @@
+-cp src
+
+-main Main
+
+-js bin/test.js
+-dce no
+-debug
+-D dump=pretty
+--next
+-cmd node bin/test.js
