@@ -1,4 +1,5 @@
 package ;
+import kro13.ArrayQuery;
 import haxe.Json;
 import haxe.unit.TestCase;
 
@@ -110,7 +111,7 @@ class ArrayQueryTest extends TestCase
         arr[1].v = 2;
         var q = Json.parse("{b:false}");
 
-        var items:Array<MyClass> = ArrayQuery.match(arr, q);
+        var items:Array<MyClass> = kro13.ArrayQuery.match(arr, q);
 
         assertEquals(items.length, 3);
     }*/

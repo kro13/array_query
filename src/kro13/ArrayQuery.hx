@@ -1,25 +1,20 @@
-package ;
+package kro13;
 import haxe.macro.Expr.ExprOf;
-import Array;
-import haxe.macro.Expr.ExprOf;
-import haxe.EnumTools.EnumValueTools;
-import haxe.macro.Expr.ExprOf;
+
 import haxe.macro.Expr;
 import haxe.macro.Type;
 import haxe.macro.Context;
+
 class ArrayQuery
 {
 
     public static macro function match<T>(collection:ExprOf<Array<T>>, query:Expr):Expr
     {
-        //trace(query.expr);
-
         var matchImpl:Expr = null;
 
         switch (query.expr)
         {
             case EObjectDecl(fields):
-                //trace(fields);
                 matchImpl = buildAnonQueryExpr(fields);
 
             default:
